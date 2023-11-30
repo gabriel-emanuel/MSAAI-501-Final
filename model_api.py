@@ -11,12 +11,13 @@ def NN_classifier(hidden_neurons, hidden_layers, lr=3e-3, gamma=1e-5, verbose=Fa
 		gamma: the l2 normalization coefficient, it affects the strength of the l2 penalty on loss. (float)
 		verbose: if true, print model summary() (boolean)
 	'''
-	X = keras.layers.Input(shape=(784,)) #Take a flat vector 28*28
-
+	X = keras.layers.Input(shape=(28,28)) #Take a flat vector 28*28
+	flatten = keras.layers.Flatten()(X)
+	
 	#Create an initial hidden layer
 	#Relu is the standard activation function, we will use it for all but the final layer.
 	
-	hidden = keras.layers.Dense(64, activation="relu", kernel_regularizer=keras.regularizers.l2(gamma))(X) #Use Default Initialization
+	hidden = keras.layers.Dense(64, activation="relu", kernel_regularizer=keras.regularizers.l2(gamma))(flatten) #Use Default Initialization
 	for h in range(hidden_layers - 1):
 		hidden = keras.layers.Dense(hidden_neurons, activation="relu", kernel_regularizer=keras.regularizers.l2(gamma))(hidden)
 
@@ -79,3 +80,20 @@ def CNN_classifier(filters, hidden_layers, lr=3e-3, gamma=1e-5, verbose=False):
 		model.summary()
 
 	return model
+
+# Retrieve Data Set
+def get_standard_data():
+	(x_train,y_train),(x_test,y_test)=tf.keras.datasets.mnist.load_data()
+
+	# Normalize Data Set
+	x_train = x_train / 255.0
+	x_test = x_test / 255.0
+
+	# Use only the training input for normalization.. avoid info leak
+	mu = np.mean(x_train)
+	std = np.std(x_train)
+
+	x_train = (x_train - mu) / std
+	x_test = (x_test - mu) / std
+
+	return x_train, y_train, x_test, y_test
